@@ -20,7 +20,10 @@ export const config = {
   // ?: zero or one parameters ie (?)
   matcher: [
     '/dashboard/:path*',
-    '/change-password'
+    '/community/:path*',
+    '/journal/:path*',
+    '/transformation/:path*',
+    '/change-password/:path*'
   ]
   // matcher: ['/users/:id*']
 }

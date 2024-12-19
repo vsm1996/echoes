@@ -10,68 +10,73 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
 model User {
-  id              String         @id @default(cuid())
-  name            String?
-  username        String?        @unique
-  email           String?        @unique
-  emailVerified   DateTime?
-  hashedPassword  String?
-  image           String?
-  accounts        Account[]
-  sessions        Session[]
-  posts           Post[]
+  id              String           @id @default(cuid())
+  username        String
+  firstName       String?
+  lastName        String?
+  email           String           @unique
+  password        String // Optional if using OAuth
+  avatarUrl       String? // For profile picture
+  bio             String? // Optional profile bio
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  journalEntries  JournalEntry[]
+  transformations Transformation[]
   comments        Comment[]
-  commentsReplies CommentReply[]
+  likes           Like[]
+  Session         Session[]
 }
 
-model Post {
-  id       String    @id @default(cuid())
-  message  String
-  userId   String
-  likes    Int?
-  comments Comment[]
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+model Transformation {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  artworkUrl  String // URL of uploaded artwork
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  comments    Comment[]
+  likes       Like[]
+}
+
+model JournalEntry {
+  id        String   @id @default(cuid())
+  private   Boolean  @default(true)
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  tags      Tag[] // Tags like "Reflection", "Transformation"
 }
 
 model Comment {
-  id             String         @id @default(cuid())
-  message        String
-  likes          Int
-  userId         String
-  postId         String
-  commentReplies CommentReply[]
-  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Post           Post           @relation(fields: [postId], references: [id])
+  id               String          @id @default(cuid())
+  content          String
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  userId           String
+  user             User            @relation(fields: [userId], references: [id])
+  transformationId String?
+  transformation   Transformation? @relation(fields: [transformationId], references: [id])
 }
 
-model CommentReply {
-  id        String   @id @default(cuid())
-  message   String
-  likes     Int
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Comment   Comment? @relation(fields: [commentId], references: [id])
-  commentId String?
+model Like {
+  id               String          @id @default(cuid())
+  createdAt        DateTime        @default(now())
+  userId           String
+  user             User            @relation(fields: [userId], references: [id])
+  transformationId String?
+  transformation   Transformation? @relation(fields: [transformationId], references: [id])
+}
+
+model Tag {
+  id      String         @id @default(cuid())
+  name    String         @unique
+  entries JournalEntry[]
 }
 
 model Session {

@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/prisma/client";
 import { NextAuthOptions } from "next-auth";
 import bcrypt from 'bcrypt'
+import { User } from "@prisma/client";
 
 
 const authOptions: NextAuthOptions = {
@@ -26,7 +27,7 @@ const authOptions: NextAuthOptions = {
 
         if (!user) return null;
 
-        const passwordsMatch = await bcrypt.compare(credentials.password, user.hashedPassword!)
+        const passwordsMatch = await bcrypt.compare(credentials.password, user.password!)
 
         return passwordsMatch ? user : null;
       }
@@ -36,13 +37,24 @@ const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!
     })
   ],
-  // Use the below to reinstate the JWT strategy
+  // Use the line below to reinstate the JWT strategy
   session: {
     strategy: 'jwt'
   },
   callbacks: {
-    async session({ session, token, user }) {
-      return { ...session, ...user, ...token }
+    async session({ session, token }) {
+
+      if (session?.user?.email) {
+        const user = await prisma.user.findUnique({
+          where: { email: session.user.email }
+        })
+
+        session.user.firstName = user?.firstName
+        session.user.lastName = user?.lastName
+        session.user.username = user?.username
+      }
+
+      return { ...session, ...token }
     },
     async redirect({ url, baseUrl }) {
       return Promise.resolve('/dashboard')
