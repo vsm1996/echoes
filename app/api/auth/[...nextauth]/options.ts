@@ -49,9 +49,9 @@ const authOptions: NextAuthOptions = {
           where: { email: session.user.email }
         })
 
-        session.user.firstName = user?.firstName
-        session.user.lastName = user?.lastName
-        session.user.username = user?.username
+        session.user.firstName = user!.firstName
+        session.user.lastName = user!.lastName
+        session.user.username = user!.username
       }
 
       return { ...session, ...token }
