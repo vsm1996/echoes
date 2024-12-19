@@ -25,7 +25,7 @@ const authOptions: NextAuthOptions = {
           where: { email: credentials.email }
         })
 
-        if (!user) return null;
+        if (!user) return null
 
         const passwordsMatch = await bcrypt.compare(credentials.password, user.password!)
 
