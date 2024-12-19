@@ -6,8 +6,11 @@ import schema from '../schema'
 
 export async function GET(
   request: NextRequest,
-  { params: { id } }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+
+  const id = (await params).id
+
   const user = await prisma.user.findUnique({
     where: { id: id },
     include: {
@@ -23,8 +26,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params: { id } }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const id = (await params).id
   const body = await request.json()
 
   const validation = schema.safeParse(body)
@@ -56,7 +60,8 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params: { id } }: { params: { id: string } }) {
+  { params }: { params: Promise<{ id: string }> }) {
+  const id = (await params).id
   // Fetch user from db
   const user = await prisma.user.findUnique({
     where: { id: id }
