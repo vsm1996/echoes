@@ -1,4 +1,4 @@
-import GoogleProvider from "next-auth/providers/google";
+import GoogleProvider, { GoogleProfile } from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/prisma/client";
@@ -33,8 +33,19 @@ const authOptions: NextAuthOptions = {
       }
     }),
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!
+      clientId: process.env.AUTH_GOOGLE_ID!,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+      profile: (_profile: GoogleProfile) => {
+        console.log('proof: ', _profile)
+        return {
+          id: _profile.sub,
+          firstName: _profile.given_name,
+          lastName: _profile.family_name,
+          email: _profile.email,
+          emailVerified: _profile.email_verified,
+          avatarUrl: _profile.picture
+        };
+      },
     })
   ],
   // Use the line below to reinstate the JWT strategy

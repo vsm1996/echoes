@@ -10,13 +10,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
 model User {
   id              String           @id @default(cuid())
-  username        String
+  username        String?
   firstName       String?
+  accounts        Account[]
   lastName        String?
   email           String           @unique
-  password        String // Optional if using OAuth
+  emailVerified   Boolean?
+  password        String? // Optional if using OAuth
   avatarUrl       String? // For profile picture
   bio             String? // Optional profile bio
   createdAt       DateTime         @default(now())
