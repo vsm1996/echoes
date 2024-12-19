@@ -25,7 +25,7 @@ const authOptions: NextAuthOptions = {
           where: { email: credentials.email }
         })
 
-        if (!user) return null
+        if (!user) return null;
 
         const passwordsMatch = await bcrypt.compare(credentials.password, user.password!)
 
@@ -36,7 +36,6 @@ const authOptions: NextAuthOptions = {
       clientId: process.env.AUTH_GOOGLE_ID!,
       clientSecret: process.env.AUTH_GOOGLE_SECRET!,
       profile: (_profile: GoogleProfile) => {
-        console.log('proof: ', _profile)
         return {
           id: _profile.sub,
           firstName: _profile.given_name,
